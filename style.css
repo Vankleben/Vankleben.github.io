@@ -92,24 +92,55 @@ main{position:relative;z-index:3;width:min(1060px,92vw);margin:0 auto}
 /* ---- 项目 ---- */
 .works{padding:10vh 0 12vh;border-top:1px solid var(--hair)}
 .work{
-  display:grid;grid-template-columns:120px 1fr auto;column-gap:4vw;align-items:start;
-  text-decoration:none;color:var(--ink);
+  position:relative;
+  display:grid;grid-template-columns:120px 1fr;column-gap:4vw;align-items:start;
+  color:var(--ink);cursor:pointer;
   padding:5vh 0;border-bottom:1px solid var(--hair);transition:padding-left .4s;
 }
 .work:hover{padding-left:14px}
 .idx{font-family:var(--sans);font-weight:800;font-size:clamp(60px,7vw,100px);line-height:.9;
   letter-spacing:-.03em;
   color:transparent;-webkit-text-stroke:1.5px rgba(124,255,178,.45)}
-.w-body{display:flex;flex-direction:column}
+.w-body{display:flex;flex-direction:column;max-width:560px}
 .w-status{
   align-self:flex-start;font-family:var(--mono);font-size:9px;letter-spacing:.22em;
   color:var(--em-hi);border:1px solid rgba(124,255,178,.4);padding:4px 10px;margin-bottom:14px;
 }
 .w-title{font-size:clamp(30px,3.6vw,46px);font-weight:700;letter-spacing:-.02em}
 .w-title em{font-style:normal;color:var(--em-hi)}
-.w-desc{font-family:var(--sans);font-size:14.5px;color:var(--dim);margin-top:12px;line-height:1.9}
-.w-arrow{align-self:center;font-family:var(--mono);font-size:22px;color:var(--dim);transition:.3s}
-.work:hover .w-arrow{color:var(--em-hi);transform:translateX(8px)}
+/* 介绍文字：默认收起，悬停浮现 */
+.w-desc{font-family:var(--sans);font-size:14.5px;color:var(--dim);line-height:1.9;
+  max-height:0;opacity:0;margin-top:0;overflow:hidden;
+  transition:max-height .6s cubic-bezier(.22,1,.36,1),opacity .45s ease,margin-top .6s cubic-bezier(.22,1,.36,1)}
+.work:hover .w-desc{max-height:300px;opacity:1;margin-top:12px}
+/* 展开区内的仓库链接（随介绍一起浮现） */
+.w-link{display:inline-block;align-self:flex-start;font-family:var(--mono);font-size:11px;
+  letter-spacing:.18em;color:var(--em-hi);text-decoration:none;
+  border-bottom:1px solid rgba(124,255,178,.35);
+  max-height:0;opacity:0;margin-top:0;overflow:hidden;
+  transition:max-height .6s cubic-bezier(.22,1,.36,1),opacity .45s ease,margin-top .6s cubic-bezier(.22,1,.36,1),.3s}
+.work:hover .w-link{max-height:44px;opacity:1;margin-top:18px}
+.w-link:hover{border-bottom-color:var(--em-hi);text-shadow:0 0 16px rgba(124,255,178,.5)}
+
+/* 悬停浮现 figure（与 Emerald Horizon 同源：透明底 + 翡翠绿 + 混合模式） */
+.w-fig{
+  position:absolute;right:0;top:50%;z-index:1;pointer-events:none;
+  width:min(32%,360px);
+  opacity:0;transform:translateY(-46%) translateX(18px) scale(.97);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1);
+}
+.work:hover .w-fig{opacity:1;transform:translateY(-50%) translateX(0) scale(1)}
+.w-fig img{display:block;width:auto;max-width:100%;max-height:270px;margin-left:auto;
+  mix-blend-mode:screen;filter:drop-shadow(0 0 26px rgba(52,209,123,.22))}
+/* 触屏 / 窄屏：没有悬停，介绍与 figure 全部常显 */
+@media (hover:none),(max-width:760px){
+  .w-desc,.w-link{max-height:none;opacity:1}
+  .w-desc{margin-top:12px}
+  .w-link{margin-top:18px}
+  .w-fig{position:static;grid-column:1/-1;width:100%;max-width:520px;
+    margin-top:26px;opacity:.95;transform:none}
+  .w-fig img{margin:0 auto;max-height:340px}
+}
 
 /* ---- 页脚 ---- */
 .colophon{padding:10vh 0 8vh;text-align:center}
@@ -135,6 +166,5 @@ main{position:relative;z-index:3;width:min(1060px,92vw);margin:0 auto}
   .attr li{grid-template-columns:110px 1fr 36px;gap:12px}
   .a-name{font-size:12.5px}
   .work{grid-template-columns:64px 1fr}
-  .w-arrow{display:none}
   .idx{font-size:52px}
 }
