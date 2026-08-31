@@ -101,7 +101,7 @@ main{position:relative;z-index:3;width:min(1060px,92vw);margin:0 auto}
 .idx{font-family:var(--sans);font-weight:800;font-size:clamp(60px,7vw,100px);line-height:.9;
   letter-spacing:-.03em;
   color:transparent;-webkit-text-stroke:1.5px rgba(124,255,178,.45)}
-.w-body{display:flex;flex-direction:column;max-width:560px}
+.w-body{display:flex;flex-direction:column;max-width:520px}
 .w-status{
   align-self:flex-start;font-family:var(--mono);font-size:9px;letter-spacing:.22em;
   color:var(--em-hi);border:1px solid rgba(124,255,178,.4);padding:4px 10px;margin-bottom:14px;
@@ -124,12 +124,12 @@ main{position:relative;z-index:3;width:min(1060px,92vw);margin:0 auto}
 
 /* 悬停浮现 figure（与 Emerald Horizon 同源：透明底 + 翡翠绿 + 混合模式） */
 .w-fig{
-  position:absolute;right:0;top:50%;z-index:1;pointer-events:none;
-  width:min(32%,360px);
-  opacity:0;transform:translateY(-46%) translateX(18px) scale(.97);
+  position:absolute;right:0;top:5vh;z-index:1;pointer-events:none;
+  width:min(30%,330px);
+  opacity:0;transform:translateX(18px) scale(.97);
   transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1);
 }
-.work:hover .w-fig{opacity:1;transform:translateY(-50%) translateX(0) scale(1)}
+.work:hover .w-fig{opacity:1;transform:translateX(0) scale(1)}
 .w-fig img{display:block;width:auto;max-width:100%;max-height:270px;margin-left:auto;
   mix-blend-mode:screen;filter:drop-shadow(0 0 26px rgba(52,209,123,.22))}
 /* 触屏 / 窄屏：没有悬停，介绍与 figure 全部常显 */

@@ -154,6 +154,20 @@ void main() {
   addEventListener('uplink:done', begin, { once: true });
 })();
 
+/* 项目卡片点击展开/收起 */
+(function workToggle () {
+  document.querySelectorAll('.work').forEach((w) => {
+    const toggle = () => w.classList.toggle('open');
+    w.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return; // 详情里的链接正常跳转
+      toggle();
+    });
+    w.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
+})();
+
 /* HUD 滚动百分比 */
 (function scrollPct () {
   const el = document.getElementById('scrollPct');
