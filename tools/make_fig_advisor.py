@@ -76,6 +76,20 @@ def vtext(text, f, fill):
     return tile.rotate(90, expand=True)
 
 
+def label_tile(text, f, fill):
+    """把一段文字渲染成紧贴墨迹的图块，返回 (tile, 墨迹 bbox)。"""
+    pad = s(4)
+    box = f.getbbox(text)
+    tile = Image.new("RGBA", (box[2] - box[0] + 2 * pad, box[3] - box[1] + 2 * pad), (0, 0, 0, 0))
+    ImageDraw.Draw(tile).text((pad - box[0], pad - box[1]), text, font=f, fill=fill)
+    return tile, tile.getbbox()
+
+
+def plate_left_ss(i, y_ss):
+    """第 i 层色板左斜边在高度 y_ss 处的 x（超采样坐标）。"""
+    return s(196 + 16 * i) - (y_ss - s(140 + 78 * i))
+
+
 def downscale(img):
     """4x4 块均值降采样（浮点预乘，数学上精确复原色板值）。
 
@@ -125,32 +139,45 @@ def main():
             img, ticks(L["y"], x0, 400, 46, 46, EM_HI + (235,))
         )
 
+    # 字号按参照图实测的"墨高"标定（fig-bear 标题行高 13px、副标题 9px、注释 8px）；
+    # Consolas 大写字母墨高约 0.64em，故 20px→13px、13px→8px、12px→7.6px。
+    TITLE_PX, SUB_PX, SMALL_PX = 20, 13, 12
+
     # ---- 文字 ----
     txt = Image.new("RGBA", img.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(txt)
 
     # 左上两行标题
-    draw_text(d, (36, 14), "ADVISOR AGENT — SOURCE-GROUNDED", font(FONT_B, 13), INK)
-    draw_text(d, (36, 45), "LLM FUNCTION CALLING · 3-LAYER VERIFY", font(FONT, 9), DIM)
+    draw_text(d, (36, 12), "ADVISOR AGENT — SOURCE-GROUNDED", font(FONT_B, TITLE_PX), INK)
+    draw_text(d, (36, 42), "LLM FUNCTION CALLING · 3-LAYER VERIFY", font(FONT, SUB_PX), DIM)
 
-    # 每层左侧的小标签（右对齐到版心细线内侧）
+    # 每层左侧的小标签：按"实际墨迹边缘"定位，保证标签底端与色板斜边仍有充足间隙。
+    # 注意 getbbox 不含抗锯齿晕边，且斜边在标签底端处最靠右，故按底端 + 晕边余量再退
+    # GAP_PX，确保视觉上不贴边。
+    GAP_PX = 22
     for i, L in enumerate(layers):
-        draw_text(d, (172 + i * 16, L["y"] + 18), L["label"], font(FONT, 8), DIM + (230,), anchor="ra")
+        tile, ink = label_tile(L["label"], font(FONT, SMALL_PX), DIM + (235,))
+        ink_h = ink[3] - ink[1]
+        target_top = s(L["y"] + 18) - ink_h // 2          # 墨迹垂直居中于该层
+        target_bottom = target_top + ink_h
+        target_right = plate_left_ss(i, target_bottom) - s(GAP_PX)
+        img.alpha_composite(tile, (target_right - ink[2], target_top - ink[1]))
 
     # 底部关键结论
     draw_text(
-        d, (W // 2, 453), "36 ADVISOR CARDS FROM ONE SCHOOL NAME",
-        font(FONT, 8), EM_HI, anchor="ma",
+        d, (W // 2, 452), "36 ADVISOR CARDS FROM ONE SCHOOL NAME",
+        font(FONT, SMALL_PX), EM_HI, anchor="ma",
     )
 
     img = Image.alpha_composite(img, txt)
 
-    # 左右竖排注释
-    for text, x, anchor_y in (
-        ("18 TOOLS · PYTHON · MIT", 2, 157),
-        ("EVIDENCE VERBATIM OR FLAGGED", W - 10, 157),
+    # 左右竖排注释（右侧按"右边缘"对齐，避免旋转后的字块被画布裁掉）
+    for text, side, anchor_y in (
+        ("18 TOOLS · PYTHON · MIT", "left", 157),
+        ("EVIDENCE VERBATIM OR FLAGGED", "right", 157),
     ):
-        tile = vtext(text, font(FONT, 8), DIM + (225,))
+        tile = vtext(text, font(FONT, SMALL_PX), DIM + (225,))
+        x = 2 if side == "left" else W - 2 - tile.width / SS
         img.alpha_composite(tile, (s(x), s(anchor_y)))
 
     img = downscale(img)
